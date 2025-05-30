@@ -1,1 +1,5 @@
+Evaluation Metrics
 
+Task 1 & Task 3: Evaluated using C-index (Concordance Index).
+
+Task 2: Evaluated using F1 score.
