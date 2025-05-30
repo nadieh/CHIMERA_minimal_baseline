@@ -41,7 +41,7 @@ cd /path/to/your/desired/location
 ```
 Clone the repository:
 ```
-git clone [https://github.com/nadieh/CHIMERA_minimal_baseline.git](https://github.com/nadieh/CHIMERA_minimal_baseline.git)
+git clone https://github.com/nadieh/CHIMERA_minimal_baseline.git
 ```
 Change to the task directory you want to run (e.g., Task1, Task2 or Task3):
 ```
