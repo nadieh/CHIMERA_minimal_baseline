@@ -41,11 +41,11 @@ cd /path/to/your/desired/location
 ```
 Clone the repository:
 ```
-git clone https://github.com/DIAGNijmegen/PANTHER_baseline.git
+git clone [https://github.com/DIAGNijmegen/PANTHER_baseline.git](https://github.com/nadieh/CHIMERA_minimal_baseline.git)
 ```
-Change to the task directory you want to run (e.g., Task1 or Task2):
+Change to the task directory you want to run (e.g., Task1, Task2 or Task3):
 ```
-cd /path/to/PANTHER_baseline/Task1_baseline # or Task2_baseline 
+cd /path/to/each/task
 ```
 Follow the instructions provided here to set up the necessary files. Then, to test the container locally, run:
 ```
