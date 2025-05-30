@@ -1,5 +1,7 @@
 ## Evaluation Metrics
 
-Task 1 & Task 3: Evaluated using C-index (Concordance Index).
+The following metrics will be used to evaluate the performance of submissions:
 
-Task 2: Evaluated using F1 score.
+- **Task 1**: Concordance Index (C-index)  
+- **Task 2**: F1 Score  
+- **Task 3**: Concordance Index (C-index)
