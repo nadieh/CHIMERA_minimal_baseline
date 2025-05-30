@@ -1,1 +1,2 @@
+## GC Submission
 You can upload your model as a standalone tarball (.tar.gz) via Grand Challenge under the Your algorithm > Models section. Alternatively, include it during the container-image build by placing it in a resources/ directory. Uploading as a tarball offers the advantage of easier updates compared to rebuilding the entire container image. If provided, the tarball will be automatically extracted to /opt/ml/model/ at runtime.
