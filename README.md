@@ -31,6 +31,23 @@ Each task follows this structure:
 
 Depending on your preferred development setup, you can follow one of our tutorials:
 
+## ⚙️ Running the Baseline Models Locally
+To try out the baseline models on your local system, follow these steps:
+
+Open a terminal or command prompt
+Navigate to the directory where you want to clone the repository:
+cd /path/to/your/desired/location
+Clone the repository:
+
+git clone https://github.com/DIAGNijmegen/PANTHER_baseline.git
+
+Change to the task directory you want to run (e.g., Task1 or Task2):
+
+cd /path/to/PANTHER_baseline/Task1_baseline # or Task2_baseline 
+
+Follow the instructions provided here to set up the necessary files. Then, to test the container locally, run:
+./do_test_run.sh
+This script launches Docker to execute the inference.py script.
 
 ## 🛠️ Customization
 Modify inference.py to implement your own feature extraction or prediction logic.
