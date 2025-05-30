@@ -47,7 +47,7 @@ Change to the task directory you want to run (e.g., Task1, Task2 or Task3):
 ```
 cd /path/to/each/task
 ```
-Follow the instructions provided here to set up the necessary files. Then, to test the container locally, run:
+Follow the instructions provided [here](https://github.com/nadieh/CHIMERA_minimal_baseline/blob/main/CHIMERA-bladder-brs/model/README.md) to set up the necessary files. Then, to test the container locally, run:
 ```
 ./do_test_run.sh
 ```
