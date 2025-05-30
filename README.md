@@ -31,21 +31,11 @@ Each task follows this structure:
 
 Depending on your preferred development setup, you can follow one of our tutorials:
 
-- **Local development with Docker**
-- **Local development with Python virtual environment** *(experimental)*
-
-> **Note:** We're working on adding instructions for providing the script with the necessary inputs — stay tuned!
-
-⚠️ The local Python virtual environment workflow does **not** support creating a Docker container suitable for submission to Grand Challenge. For that, please follow the Docker-based workflow.
-
----
 
 ## 🛠️ Customization
+Modify inference.py to implement your own feature extraction or prediction logic.
+Add your model weights to the model/ directory or upload them as a tarball to Grand Challenge.
+Update requirements.in to include additional Python dependencies and regenerate requirements.txt using pip-compile.
+## 📄 License
+This project is licensed under the Apache License 2.0. See the LICENSE file for details.
 
-- Modify `inference.py` to implement your own feature extraction or prediction logic.
-- Add your model weights to the `model/` directory or upload them as a tarball to Grand Challenge.
-- Update `requirements.in` to include any additional Python dependencies.
-- Regenerate `requirements.txt` using:
-
-  ```bash
-  pip-compile requirements.in
