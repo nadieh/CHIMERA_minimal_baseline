@@ -53,6 +53,8 @@ def main():
 
     predictions = read_predictions()
 
+    print("predictions", predictions)
+
     # We now process each algorithm job for this submission
     # Note that the jobs are not in any specific order!
     # We work that out from predictions.json
@@ -61,6 +63,9 @@ def main():
     metrics["results"] = run_prediction_processing(fn=process, predictions=predictions)
 
     result_df = pd.DataFrame(metrics["results"])
+
+   
+    print("result_df", result_df)
 
     survival_times = np.array(result_df["case_id_gt_time"])
     events = np.array(result_df["case_id_gt_event"], dtype=bool)
@@ -390,15 +395,16 @@ def process_interf0(
     # Fourthly, your load your ground truth
     # Include it in your evaluation container by placing it in ground_truth/
 
-    
 
-    ground_truth_df =  pd.read_csv(GROUND_TRUTH_DIRECTORY)
 
-    gt_image_name_df = ground_truth_df[ground_truth_df["case_id"]
-                                       ==image_name_prostatectomy_tissue_whole_slide_image[:-2]]
+    ground_truth_df =  pd.read_csv(GROUND_TRUTH_DIRECTORY, dtype={'case_id': str})
 
-    
 
+    gt_image_name_df = ground_truth_df[ground_truth_df["case_id"]==image_name_prostatectomy_tissue_whole_slide_image[:-6]]
+
+    print('gt_image_name_df',gt_image_name_df)
+
+ 
     gt_image_name_time = gt_image_name_df["time_to_follow_up_or_bcr"].item()
 
     print('gt_image_name_time',gt_image_name_time)

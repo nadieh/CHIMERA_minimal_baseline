@@ -71,6 +71,7 @@ def run_prediction_processing(*, fn, predictions):
     -------
     A list of results
     """
+    print("Running prediction processing")
     with Manager() as manager:
         results = manager.dict()
         errors = manager.dict()
@@ -93,6 +94,8 @@ def run_prediction_processing(*, fn, predictions):
 
         display_processing_report(succeeded, canceled, failed)
 
+        print('failed:', len(failed),'succeeded:', len(succeeded), 'canceled:', len(canceled))
+
         if errors:
             for prediction_pk, tb_str in errors.items():
                 print(
@@ -106,6 +109,7 @@ def run_prediction_processing(*, fn, predictions):
 
 
 def _start_pool_worker(fn, predictions, max_workers, results, errors):
+    print("Started pooling worker")
     process = Process(
         target=_pool_worker,
         name="PredictionProcessing",
@@ -124,6 +128,7 @@ def _start_pool_worker(fn, predictions, max_workers, results, errors):
 
 def _pool_worker(*, fn, predictions, max_workers, results, errors):
     caught_exception = False
+    print("In the pooling worker")
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         try:
             # Submit the processing tasks of the predictions
@@ -135,9 +140,13 @@ def _pool_worker(*, fn, predictions, max_workers, results, errors):
                 for future, item in zip(futures, predictions, strict=True)
             }
 
+            print("Submitted processing task of predictions")
+
             for future in as_completed(future_to_predictions):
                 prediction = future_to_predictions[future]
                 prediction_pk = prediction["pk"]
+
+                print("Getting predictions...",prediction_pk)
 
                 error = future.exception()
 
