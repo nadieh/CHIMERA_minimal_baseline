@@ -1,0 +1,205 @@
+"""
+The following is a simple example evaluation method.
+
+It is meant to run within a container. Its steps are as follows:
+
+  1. Read the algorithm output
+  2. Associate original algorithm inputs with a ground truths via predictions.json
+  3. Calculate metrics by comparing the algorithm output to the ground truth
+  4. Repeat for all algorithm jobs that ran for this submission
+  5. Aggregate the calculated metrics
+  6. Save the metrics to metrics.json
+
+To run it locally, you can call the following bash script:
+
+  ./do_test_run.sh
+
+This will start the evaluation and reads from ./test/input and writes to ./test/output
+
+To save the container and prep it for upload to Grand-Challenge.org you can call:
+
+  ./do_save.sh
+
+Any container that shows the same behaviour will do, this is purely an example of how one COULD do it.
+
+Reference the documentation to get details on the runtime environment on the platform:
+https://grand-challenge.org/documentation/runtime-environment/
+
+Happy programming!
+"""
+
+import json
+
+
+import random
+import pandas as pd
+from statistics import mean
+from pathlib import Path
+from pprint import pformat, pprint
+from helpers import run_prediction_processing, tree
+from sklearn.metrics import f1_score, roc_auc_score
+
+INPUT_DIRECTORY = Path("/input")
+OUTPUT_DIRECTORY = Path("/output")
+GROUND_TRUTH_DIRECTORY = Path("/opt/ml/input/data/ground_truth/a_tarball_subdirectory/ground_truth.csv")
+
+
+def main():
+    print_inputs()
+
+    metrics = {}
+    predictions = read_predictions()
+
+    # We now process each algorithm job for this submission
+    # Note that the jobs are not in any specific order!
+    # We work that out from predictions.json
+
+    # Use concurrent workers to process the predictions more efficiently
+    metrics["results"] = run_prediction_processing(fn=process, predictions=predictions)
+
+    result_df = pd.DataFrame(metrics["results"])
+    
+    y_true = result_df["case_id_gt"].astype(int).values
+    y_prob = result_df["case_id_pred"].astype(float).values
+    y_pred = (y_prob > 0.5).astype(int)
+    print("y_true:", y_true)
+    print("y_prob:", y_prob)
+
+    f1 = f1_score(y_true, y_pred)
+    auc = roc_auc_score(y_true, y_prob)
+
+    print("F1 Score:", f1)
+    print("AUC:", auc)
+
+    metrics["aggregates"] = {
+        "f1_score": f1,
+        "auc": auc
+    }
+
+    write_metrics(metrics=metrics)
+
+    return 0
+
+
+def process(job):
+    # The key is a tuple of the slugs of the input sockets
+    interface_key = get_interface_key(job)
+
+    # Lookup the handler for this particular set of sockets (i.e. the interface)
+    handler = {
+        (
+            "bladder-cancer-tissue-biopsy-whole-slide-image",
+            "chimera-clinical-data-of-bladder-cancer-patients",
+            "tissue-mask",
+        ): process_interf0,
+    }[interface_key]
+
+    # Call the handler
+    return handler(job)
+
+
+def process_interf0(
+    job,
+):
+    """Processes a single algorithm job, looking at the outputs"""
+    report = "Processing:\n"
+    report += pformat(job)
+    report += "\n"
+
+    # Firstly, find the location of the results
+    location_brs_binary_classification = get_file_location(
+        job_pk=job["pk"],
+        values=job["outputs"],
+        slug="brs-binary-classification",
+    )
+
+    # Secondly, read the results
+    result_brs_binary_classification = load_json_file(
+        location=location_brs_binary_classification,
+    )
+
+    # Thirdly, retrieve the input file name to match it with your ground truth
+    image_name_tissue_mask = get_image_name(
+        values=job["inputs"],
+        slug="tissue-mask",
+    )
+    image_name_bladder_cancer_tissue_biopsy_whole_slide_image = get_image_name(
+        values=job["inputs"],
+        slug="bladder-cancer-tissue-biopsy-whole-slide-image",
+    )
+
+    ground_truth_df = pd.read_csv(GROUND_TRUTH_DIRECTORY)
+    gt_row = ground_truth_df[ground_truth_df["case_id"] == image_name_bladder_cancer_tissue_biopsy_whole_slide_image[:-4]]
+
+  
+
+    return {
+        "case_id": image_name_bladder_cancer_tissue_biopsy_whole_slide_image[:-4],
+        "case_id_gt": gt_row["target_class"].item(),
+        "case_id_pred": result_brs_binary_classification
+    }
+
+
+
+def print_inputs():
+    # Just for convenience, in the logs you can then see what files you have to work with
+    print("Input Files:")
+    for line in tree(INPUT_DIRECTORY):
+        print(line)
+    print("")
+
+
+def read_predictions():
+    # The prediction file tells us the location of the users' predictions
+    return load_json_file(location=INPUT_DIRECTORY / "predictions.json")
+
+
+def get_interface_key(job):
+    # Each interface has a unique key that is the set of socket slugs given as input
+    socket_slugs = [sv["interface"]["slug"] for sv in job["inputs"]]
+    return tuple(sorted(socket_slugs))
+
+
+def get_image_name(*, values, slug):
+    # This tells us the user-provided name of the input or output image
+    for value in values:
+        if value["interface"]["slug"] == slug:
+            return value["image"]["name"]
+
+    raise RuntimeError(f"Image with interface {slug} not found!")
+
+
+def get_interface_relative_path(*, values, slug):
+    # Gets the location of the interface relative to the input or output
+    for value in values:
+        if value["interface"]["slug"] == slug:
+            return value["interface"]["relative_path"]
+
+    raise RuntimeError(f"Value with interface {slug} not found!")
+
+
+def get_file_location(*, job_pk, values, slug):
+    # Where a job's output file will be located in the evaluation container
+    relative_path = get_interface_relative_path(values=values, slug=slug)
+    return INPUT_DIRECTORY / job_pk / "output" / relative_path
+
+
+def load_json_file(*, location):
+    # Reads a json file
+    with open(location) as f:
+        return json.loads(f.read())
+
+
+def write_metrics(*, metrics):
+    # Write a json document used for ranking results on the leaderboard
+    write_json_file(location=OUTPUT_DIRECTORY / "metrics.json", content=metrics)
+
+
+def write_json_file(*, location, content):
+    # Writes a json file
+    with open(location, "w") as f:
+        f.write(json.dumps(content, indent=4))
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
