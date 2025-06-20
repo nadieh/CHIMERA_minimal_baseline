@@ -4,6 +4,13 @@ FROM --platform=linux/amd64 pytorch/pytorch AS example-algorithm-amd64
 # Ensures that Python output to stdout/stderr is not buffered: prevents missing information when terminating
 ENV PYTHONUNBUFFERED=1
 
+# Install system dependencies for PyVips (as root)
+USER root
+RUN apt-get update && apt-get install -y \
+    libvips-dev \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN groupadd -r user && useradd -m --no-log-init -r -g user user
 USER user
 
