@@ -49,7 +49,7 @@ def main():
     y_prob = result_df["case_id_pred"].astype(float).values
     y_pred = (y_prob > 0.5).astype(int)
 
-    f1 = f1_score(y_true, y_pred)
+    f1 = f1_score(y_true, y_pred, average = "weighted")
     auc = roc_auc_score(y_true, y_prob)
 
     metrics["aggregates"] = {
