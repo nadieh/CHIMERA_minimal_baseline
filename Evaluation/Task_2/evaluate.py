@@ -65,7 +65,7 @@ def main():
     print("y_true:", y_true)
     print("y_prob:", y_prob)
 
-    f1 = f1_score(y_true, y_pred)
+    f1 = f1_score(y_true, y_pred ,average = "weighted")
     auc = roc_auc_score(y_true, y_prob)
 
     print("F1 Score:", f1)
